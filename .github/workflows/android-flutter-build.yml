@@ -94,6 +94,17 @@ jobs:
         with:
           node-version: 22
 
+      - name: Enable corepack shims for pnpm
+        shell: pwsh
+        run: |
+          corepack enable
+          $nodeDir = Split-Path -Parent (Get-Command node).Source
+          $pnpmShim = Join-Path $nodeDir "pnpm.cmd"
+          if (-not (Test-Path -LiteralPath $pnpmShim)) {
+            throw "corepack did not install a pnpm shim at $pnpmShim"
+          }
+          & $pnpmShim --version
+
       - name: Install Java
         uses: actions/setup-java@v4
         with:
