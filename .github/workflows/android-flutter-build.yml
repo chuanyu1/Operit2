@@ -133,6 +133,35 @@ jobs:
             throw "Android bindgen libclang was not prepared at $libclang"
           }
 
+      - name: Prepare Python virtual environment
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          $venvPython = ".venv/Scripts/python.exe"
+          if (-not (Test-Path -LiteralPath $venvPython)) {
+            throw "Python virtual environment was not created at $venvPython"
+          }
+          & $venvPython --version
+
+      - name: Prepare repository TypeScript compiler
+        shell: pwsh
+        run: |
+          npm install --prefix .ci-tools/typescript --no-audit --no-fund typescript@5.9.3
+          $tsc = ".ci-tools/typescript/node_modules/.bin/tsc.cmd"
+          if (-not (Test-Path -LiteralPath $tsc)) {
+            throw "Repository TypeScript compiler was not installed at $tsc"
+          }
+
+      - name: Install workflow plugin dependencies
+        shell: pwsh
+        run: |
+          Push-Location plugins/packages/buildin/workflow
+          try {
+            corepack pnpm install --frozen-lockfile
+          } finally {
+            Pop-Location
+          }
+
       - name: Restore Android signing material
         shell: pwsh
         env:
